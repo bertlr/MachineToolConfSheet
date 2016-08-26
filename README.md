@@ -12,8 +12,7 @@ Create a Machine Tool Configuration Sheet from G-Code file and open it in [Libre
 # Usage
 
 Open a G-Code file and click the toolbar button: ![toolbar button](src/org/roiderh/machinetoolconfsheet/hi-sheet24.png "toolbar button").
-LibreOffice opens the new Machine Tool Configuration Sheet.
+LibreOffice opens the new Machine Tool Configuration Sheet as you can see in the screenshot:
 
-A screenshot:
 ![Screenshot](screen1.png "screenshot")
 
