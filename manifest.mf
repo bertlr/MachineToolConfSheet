@@ -3,4 +3,4 @@ AutoUpdate-Show-In-Client: true
 OpenIDE-Module: org.roiderh.machinetoolconfsheet
 OpenIDE-Module-Localizing-Bundle: org/roiderh/machinetoolconfsheet/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
-
+OpenIDE-Module-Short-Description: Create a Machine Tool Configuration Sheet

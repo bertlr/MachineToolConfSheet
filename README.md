@@ -1,6 +1,6 @@
 # MachineToolConfSheet
 
-Creata a Machine Tool Configuration Sheet from G-Code file and open it in [LibreOffice](https://www.libreoffice.org/).
+Create a Machine Tool Configuration Sheet from G-Code file and open it in [LibreOffice](https://www.libreoffice.org/).
 
 # Installation
 
