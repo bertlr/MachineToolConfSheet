@@ -29,7 +29,10 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.MissingResourceException;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -79,10 +82,12 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         } catch (IOException x) {
             JOptionPane.showMessageDialog(null, "Error: " + x.getLocalizedMessage()); //NOI18N
         }
-        ArrayList<Tool> tools = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            tools.add(new Tool());
-        }
+        // allow max. 100 tools, the tool number is the index in the array:
+        TreeMap<Integer, Tool> tools = new TreeMap<>();
+        //ArrayList<Tool> tools = new ArrayList<>();
+//        for (int i = 0; i < 100; i++) {
+//            tools.add(new Tool());
+//        }
         ArrayList<String> programs = new ArrayList<>();
         int activ_tool = -1;
         // Read all Tools with comments:
@@ -92,9 +97,9 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             if (m.find()) {
                 String ts = line.substring(m.start() + 1, m.end());
                 activ_tool = Integer.parseInt(ts);
-                Tool t = tools.get(activ_tool);
-                t.used = true;
-                tools.set(activ_tool, t);
+                if (!tools.containsKey(activ_tool)) {
+                    tools.put(activ_tool, new Tool());
+                }
             } else if (line.contains("M30") || line.contains("M17") || line.contains("M2") || line.contains("M02") || line.contains("RET")) { //NOI18N
                 activ_tool = -1;
 
@@ -112,7 +117,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                     t.text.add(line);
 
-                    tools.set(activ_tool, t);
+                    tools.put(activ_tool, t);
                 }
             } else {
                 activ_tool = -1;
@@ -150,7 +155,6 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy"); //NOI18N
 
             System.out.println("Current Date: " + ft.format(dNow)); //NOI18N
-            //new InputStreamReader(CreateMachineToolConfSheetAction.class.getResourceAsStream("/resources/es.json"), "UTF-8");
             InputStream in = CreateMachineToolConfSheetAction.class.getResourceAsStream("/org/roiderh/machinetoolconfsheet/resources/base_document.docx"); //NOI18N
 
             XWPFDocument document = new XWPFDocument(in);
@@ -179,11 +183,11 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                 table = document.getTableArray(1);
                 boolean first_line = true;
-                for (int i = 0; i < tools.size(); i++) {
-                    Tool t = tools.get(i);
-                    if (t.used == false) {
-                        continue;
-                    }
+                //Iterator<
+                Set keys = tools.keySet();
+                for (Iterator i = keys.iterator(); i.hasNext();) {
+                    int toolnr = (Integer) i.next();
+                    Tool t = tools.get(toolnr);
                     XWPFTableRow tableRowTwo;
                     if (first_line) {
                         tableRowTwo = table.getRow(0);
@@ -191,7 +195,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     } else {
                         tableRowTwo = table.createRow();
                     }
-                    tableRowTwo.getCell(0).setText("T" + String.valueOf(i)); //NOI18N
+                    tableRowTwo.getCell(0).setText("T" + String.valueOf(toolnr)); //NOI18N
                     // The lines are in the reverse order, therfore reordering:
                     ArrayList<String> l = new ArrayList<>();
                     for (int j = t.text.size() - 1; j >= 0; j--) {

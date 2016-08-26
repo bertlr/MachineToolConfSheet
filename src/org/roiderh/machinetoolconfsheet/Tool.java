@@ -24,7 +24,6 @@ import java.util.ArrayList;
  */
 public class Tool {
 
-    public boolean used = false;
     public ArrayList<String> text = new ArrayList<>();
 
 }
