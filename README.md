@@ -6,7 +6,7 @@ Creata a Machine Tool Configuration Sheet from G-Code file and open it in [Libre
 
 * Requires [LibreOffice](https://www.libreoffice.org/)
 * Download from: http://plugins.netbeans.org/
-* Go to "Tools" -> "Plugins" -> "Downloaded", click "Add Plugins..." and select the downloaded file org-roiderh-maschinetoolconfsheet.nbm
+* Go to "Tools" -> "Plugins" -> "Downloaded", click "Add Plugins..." and select the downloaded file org-roiderh-machinetoolconfsheet.nbm
 * Check the Checkbox and click "Install"
 
 # Usage
