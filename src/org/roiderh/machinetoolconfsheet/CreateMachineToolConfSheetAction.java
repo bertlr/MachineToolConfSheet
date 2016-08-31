@@ -210,7 +210,12 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             System.out.println("create_table.docx written successully"); //NOI18N
 
             Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec("libreoffice " + tempFile.getCanonicalPath()); //NOI18N
+            String os = System.getProperty("os.name").toLowerCase();
+            String commandline = "soffice";            
+            if(os.contains("win")){
+                commandline = "\"C:\\Program Files (x86)\\LibreOffice 5\\program\\soffice.exe\"";
+            }
+            Process proc = rt.exec(commandline + " " + tempFile.getCanonicalPath()); //NOI18N
             System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
 
         } catch (IOException | MissingResourceException ex) {
