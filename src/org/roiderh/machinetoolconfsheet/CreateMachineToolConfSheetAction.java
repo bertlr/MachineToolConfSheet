@@ -82,12 +82,8 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         } catch (IOException x) {
             JOptionPane.showMessageDialog(null, "Error: " + x.getLocalizedMessage()); //NOI18N
         }
-        // allow max. 100 tools, the tool number is the index in the array:
+        
         TreeMap<Integer, Tool> tools = new TreeMap<>();
-        //ArrayList<Tool> tools = new ArrayList<>();
-//        for (int i = 0; i < 100; i++) {
-//            tools.add(new Tool());
-//        }
         ArrayList<String> programs = new ArrayList<>();
         int activ_tool = -1;
         // Read all Tools with comments:
@@ -116,7 +112,6 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     }
 
                     t.text.add(line);
-
                     tools.put(activ_tool, t);
                 }
             } else {
@@ -211,12 +206,17 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
             Runtime rt = Runtime.getRuntime();
             String os = System.getProperty("os.name").toLowerCase();
-            String commandline = "soffice";            
+            String command = "soffice";            
             if(os.contains("win")){
-                commandline = "\"C:\\Program Files (x86)\\LibreOffice 5\\program\\soffice.exe\"";
+                command = "\"C:\\Program Files (x86)\\LibreOffice 5\\program\\soffice.exe\"";
+                File f = new File(command);
+                if(! f.exists()){
+                    JOptionPane.showMessageDialog(null, "Error: program not found: " + command); //NOI18N
+                    return;
+                }
             }
-            Process proc = rt.exec(commandline + " " + tempFile.getCanonicalPath()); //NOI18N
-            System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
+            Process proc = rt.exec(command + " " + tempFile.getCanonicalPath()); //NOI18N
+            //System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
 
         } catch (IOException | MissingResourceException ex) {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getLocalizedMessage()); //NOI18N
