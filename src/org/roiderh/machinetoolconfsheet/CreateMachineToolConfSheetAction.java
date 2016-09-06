@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -45,6 +46,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
+import org.openide.util.NbPreferences;
 
 @ActionID(
         category = "Tools",
@@ -82,7 +84,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         } catch (IOException x) {
             JOptionPane.showMessageDialog(null, "Error: " + x.getLocalizedMessage()); //NOI18N
         }
-        
+
         TreeMap<Integer, Tool> tools = new TreeMap<>();
         ArrayList<String> programs = new ArrayList<>();
         int activ_tool = -1;
@@ -206,15 +208,16 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
             Runtime rt = Runtime.getRuntime();
             String os = System.getProperty("os.name").toLowerCase();
-            String command = "soffice";            
-            if(os.contains("win")){
-                command = "\"C:\\Program Files (x86)\\LibreOffice 5\\program\\soffice.exe\"";
-                File f = new File(command);
-                if(! f.exists()){
-                    JOptionPane.showMessageDialog(null, "Error: program not found: " + command); //NOI18N
-                    return;
-                }
+            String command = "soffice";
+            Preferences pref = NbPreferences.forModule(WordProcessingProgramPanel.class);
+            command = pref.get("executeable", "").trim();
+
+            File f = new File(command);
+            if (!f.exists()) {
+                JOptionPane.showMessageDialog(null, "Error: program not found: " + command); //NOI18N
+                return;
             }
+
             Process proc = rt.exec(command + " " + tempFile.getCanonicalPath()); //NOI18N
             //System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
 
