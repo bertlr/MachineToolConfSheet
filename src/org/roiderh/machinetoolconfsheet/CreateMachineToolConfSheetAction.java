@@ -208,17 +208,18 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
             Runtime rt = Runtime.getRuntime();
             String os = System.getProperty("os.name").toLowerCase();
-            String command = "soffice";
+            String[] command  = new String[2];
+            //command[0] = "soffice";
             Preferences pref = NbPreferences.forModule(WordProcessingProgramPanel.class);
-            command = pref.get("executeable", "").trim();
-
-            File f = new File(command);
+            command[0] = pref.get("executeable", "").trim();
+            command[1] = tempFile.getCanonicalPath();
+            File f = new File(command[0]);
             if (!f.exists()) {
-                JOptionPane.showMessageDialog(null, "Error: program not found: " + command); //NOI18N
+                JOptionPane.showMessageDialog(null, "Error: program not found: " + command[0]); //NOI18N
                 return;
             }
-
-            Process proc = rt.exec(command + " " + tempFile.getCanonicalPath()); //NOI18N
+            
+            Process proc = rt.exec(command); //NOI18N
             //System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
 
         } catch (IOException | MissingResourceException ex) {
