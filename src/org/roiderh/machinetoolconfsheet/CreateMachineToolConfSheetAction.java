@@ -91,19 +91,9 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         // Read all Tools with comments:
         for (int i = lines.size() - 1; i >= 0; i--) {
             String line = lines.get(i).trim();
-            Matcher m = Pattern.compile("(T)([0-9])+").matcher(line); //NOI18N
-            if (m.find()) {
-                String ts = line.substring(m.start() + 1, m.end());
-                activ_tool = Integer.parseInt(ts);
-                if (!tools.containsKey(activ_tool)) {
-                    tools.put(activ_tool, new Tool());
-                }
-            } else if (line.contains("M30") || line.contains("M17") || line.contains("M2") || line.contains("M02") || line.contains("RET")) { //NOI18N
-                activ_tool = -1;
-
-            } else if (line.trim().startsWith("%")) { //NOI18N
-                activ_tool = -1;
-            } else if (line.startsWith("(") || line.startsWith(";")) { //NOI18N
+            Matcher tool_change_command = Pattern.compile("(T)([0-9])+").matcher(line); //NOI18N
+            
+            if (line.startsWith("(") || line.startsWith(";")) { //NOI18N
                 if (activ_tool >= 0) {
 
                     Tool t = tools.get(activ_tool);
@@ -115,7 +105,19 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                     t.text.add(line);
                     tools.put(activ_tool, t);
+                }           
+            } else if (line.trim().startsWith("%")) { //NOI18N
+                activ_tool = -1;
+            } else if (tool_change_command.find()) {
+                String ts = line.substring(tool_change_command.start() + 1, tool_change_command.end());
+                activ_tool = Integer.parseInt(ts);
+                if (!tools.containsKey(activ_tool)) {
+                    tools.put(activ_tool, new Tool());
                 }
+            } else if (line.contains("M30") || line.contains("M17") || line.contains("M2") || line.contains("M02") || line.contains("RET")) { //NOI18N
+                activ_tool = -1;
+
+             
             } else {
                 activ_tool = -1;
             }
