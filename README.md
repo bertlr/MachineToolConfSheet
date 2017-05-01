@@ -16,3 +16,4 @@ LibreOffice opens the new Machine Tool Configuration Sheet as you can see in the
 
 ![Screenshot](screen1.png "screenshot")
 
+

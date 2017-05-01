@@ -172,14 +172,36 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 String prog = String.join(", ", programs); //NOI18N
                 table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr"));
                 table.getRow(0).getCell(1).setText(prog);
-                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "PartNr"));
-                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Person"));
-                table.getRow(3).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
-                table.getRow(3).getCell(1).setText(ft.format(dNow));
-                table.getRow(4).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ZeroPointShift"));
-                table.getRow(5).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Text"));
-                table.getRow(5).getCell(1).setText(String.join("\n", header)); //NOI18N
+                
+                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
+                table.getRow(1).getCell(1).setText(ft.format(dNow));
+                for (int i = 0; i<header.size();i++) {
+                    
+                    XWPFTableRow tableRowTwo;
+                    
+                    tableRowTwo = table.createRow();
+                    
+                    String name;
+                    String desc;
+                    int splitpos = header.get(i).indexOf(":");//NOI18N
+                    if(splitpos > 1 && splitpos < 25){
+                        name=header.get(i).substring(0,splitpos).trim();
+                        desc=header.get(i).substring(splitpos+1).trim();
+                    }else{
+                        name="";//NOI18N
+                        desc=header.get(i).trim();
+                    }
+                                       
+                    tableRowTwo.getCell(0).setText(name);
+                    tableRowTwo.getCell(1).setText(desc);
+                   
 
+                }
+
+                
+                
+                
+                
                 table = document.getTableArray(1);
                 boolean first_line = true;
                 //Iterator<
@@ -209,11 +231,11 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             System.out.println("create_table.docx written successully"); //NOI18N
 
             Runtime rt = Runtime.getRuntime();
-            String os = System.getProperty("os.name").toLowerCase();
+            String os = System.getProperty("os.name").toLowerCase();//NOI18N
             String[] command  = new String[2];
             //command[0] = "soffice";
             Preferences pref = NbPreferences.forModule(WordProcessingProgramPanel.class);
-            command[0] = pref.get("executeable", "").trim();
+            command[0] = pref.get("executeable", "").trim();//NOI18N
             command[1] = tempFile.getCanonicalPath();
             File f = new File(command[0]);
             if (!f.exists()) {
