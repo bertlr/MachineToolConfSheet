@@ -201,7 +201,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 tableRowHeader = table.createRow();
                 
                 XWPFRun run_table;
-                String prev_name = "";
+                String prev_name = ""; //NOI18N
                 for (int i = 0; i < table_text.size(); i++) {
                     String name = table_text.get(i).get(0);
                     String desc = table_text.get(i).get(1);
@@ -214,7 +214,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     else if(prev_name.length() > 0 && name.length() == 0){
                         tableRowHeader = table.createRow();
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
-                        tableRowHeader.getCell(0).setText("");                      
+                        tableRowHeader.getCell(0).setText("");   //NOI18N                    
                         run_table.setText(desc);
                     }else if(prev_name.length() == 0 && name.length() == 0){
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
@@ -227,14 +227,12 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                 table = document.getTableArray(1);
                 boolean first_line = true;
-                //Iterator<
                 Set keys = tools.keySet();
                 for (Iterator i = keys.iterator(); i.hasNext();) {
                     int toolnr = (Integer) i.next();
                     Tool t = tools.get(toolnr);
                     XWPFTableRow tableRowTwo;
                     if (first_line) {
-                        //table.createRow();
                         tableRowTwo = table.getRow(0);
                         first_line = false;
                     } else {
