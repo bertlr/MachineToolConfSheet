@@ -234,19 +234,22 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     Tool t = tools.get(toolnr);
                     XWPFTableRow tableRowTwo;
                     if (first_line) {
+                        //table.createRow();
                         tableRowTwo = table.getRow(0);
                         first_line = false;
                     } else {
                         tableRowTwo = table.createRow();
                     }
                     tableRowTwo.getCell(0).setText("T" + String.valueOf(toolnr)); //NOI18N
+                    
                     // The lines are in the reverse order, therfore reordering:
-                    ArrayList<String> l = new ArrayList<>();
                     for (int j = t.text.size() - 1; j >= 0; j--) {
-                        l.add(t.text.get(j));
+                        XWPFRun run_tool = tableRowTwo.getCell(1).getParagraphs().get(0).createRun();
+                        run_tool.setText(t.text.get(j));
+                        if(j > 0){
+                            run_tool.addBreak();
+                        }
                     }
-                    tableRowTwo.getCell(1).setText(String.join("\n", l)); //NOI18N
-
                 }
 
                 document.write(out);
