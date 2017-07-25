@@ -199,22 +199,28 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 }
                 XWPFTableRow tableRowHeader;
                 tableRowHeader = table.createRow();
+                
+                XWPFRun run_table;
                 String prev_name = "";
                 for (int i = 0; i < table_text.size(); i++) {
                     String name = table_text.get(i).get(0);
                     String desc = table_text.get(i).get(1);
                     if(name.length() > 0 ){
                         tableRowHeader = table.createRow();
-                        tableRowHeader.getCell(0).setText(name);
-                        tableRowHeader.getCell(1).setText(desc);
+                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
+                        tableRowHeader.getCell(0).setText(name);                        
+                        run_table.setText(desc);
                     }
                     else if(prev_name.length() > 0 && name.length() == 0){
                         tableRowHeader = table.createRow();
-                        tableRowHeader.getCell(0).setText("");
-                        tableRowHeader.getCell(1).setText(desc);
+                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
+                        tableRowHeader.getCell(0).setText("");                      
+                        run_table.setText(desc);
                     }else if(prev_name.length() == 0 && name.length() == 0){
-                        tableRowHeader.getCell(1).setText("\n");
-                        tableRowHeader.getCell(1).setText(desc);
+                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
+                        run_table.addBreak();
+                        run_table.setText(desc);
+                        
                     }
                     prev_name = name;
                 }
