@@ -92,7 +92,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         for (int i = lines.size() - 1; i >= 0; i--) {
             String line = lines.get(i).trim();
             Matcher tool_change_command = Pattern.compile("(T)([0-9])+").matcher(line); //NOI18N
-            
+
             if (line.startsWith("(") || line.startsWith(";")) { //NOI18N
                 if (activ_tool >= 0) {
 
@@ -105,7 +105,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                     t.text.add(line);
                     tools.put(activ_tool, t);
-                }           
+                }
             } else if (line.trim().startsWith("%")) { //NOI18N
                 activ_tool = -1;
             } else if (tool_change_command.find()) {
@@ -117,7 +117,6 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             } else if (line.contains("M30") || line.contains("M17") || line.contains("M2") || line.contains("M02") || line.contains("RET")) { //NOI18N
                 activ_tool = -1;
 
-             
             } else {
                 activ_tool = -1;
             }
@@ -172,36 +171,54 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 String prog = String.join(", ", programs); //NOI18N
                 table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr"));
                 table.getRow(0).getCell(1).setText(prog);
-                
+
                 table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
                 table.getRow(1).getCell(1).setText(ft.format(dNow));
-                for (int i = 0; i<header.size();i++) {
-                    
-                    XWPFTableRow tableRowTwo;
-                    
-                    tableRowTwo = table.createRow();
-                    
-                    String name;
-                    String desc;
+                
+                ArrayList<ArrayList<String>> table_text = new ArrayList<>();
+                for (int i = 0; i < header.size(); i++) {
+
+                    ArrayList<String> line = new ArrayList<>();
+                    String name; // first column
+                    String desc; // second column
+
                     int splitpos = header.get(i).indexOf(":");//NOI18N
-                    if(splitpos > 1 && splitpos < 25){
-                        name=header.get(i).substring(0,splitpos).trim();
-                        desc=header.get(i).substring(splitpos+1).trim();
-                    }else{
-                        name="";//NOI18N
-                        desc=header.get(i).trim();
+                    if (splitpos > 1 && splitpos < 25) {
+                        name = header.get(i).substring(0, splitpos).trim();
+                        desc = header.get(i).substring(splitpos + 1).trim();
+                    } else {
+                        name = "";//NOI18N
+                        desc = header.get(i).trim();
                     }
-                                       
-                    tableRowTwo.getCell(0).setText(name);
-                    tableRowTwo.getCell(1).setText(desc);
-                   
+                    line.add(name);
+                    line.add(desc);
+                            
+                    table_text.add(line);
+                    
 
                 }
+                XWPFTableRow tableRowHeader;
+                tableRowHeader = table.createRow();
+                String prev_name = "";
+                for (int i = 0; i < table_text.size(); i++) {
+                    String name = table_text.get(i).get(0);
+                    String desc = table_text.get(i).get(1);
+                    if(name.length() > 0 ){
+                        tableRowHeader = table.createRow();
+                        tableRowHeader.getCell(0).setText(name);
+                        tableRowHeader.getCell(1).setText(desc);
+                    }
+                    else if(prev_name.length() > 0 && name.length() == 0){
+                        tableRowHeader = table.createRow();
+                        tableRowHeader.getCell(0).setText("");
+                        tableRowHeader.getCell(1).setText(desc);
+                    }else if(prev_name.length() == 0 && name.length() == 0){
+                        tableRowHeader.getCell(1).setText("\n");
+                        tableRowHeader.getCell(1).setText(desc);
+                    }
+                    prev_name = name;
+                }
 
-                
-                
-                
-                
                 table = document.getTableArray(1);
                 boolean first_line = true;
                 //Iterator<
@@ -232,7 +249,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
             Runtime rt = Runtime.getRuntime();
             String os = System.getProperty("os.name").toLowerCase();//NOI18N
-            String[] command  = new String[2];
+            String[] command = new String[2];
             //command[0] = "soffice";
             Preferences pref = NbPreferences.forModule(WordProcessingProgramPanel.class);
             command[0] = pref.get("executeable", "").trim();//NOI18N
@@ -242,7 +259,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Error: program not found: " + command[0]); //NOI18N
                 return;
             }
-            
+
             Process proc = rt.exec(command); //NOI18N
             //System.out.println("ready created: " + tempFile.getCanonicalPath()); //NOI18N
 
