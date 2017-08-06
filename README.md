@@ -9,6 +9,12 @@ Create a Machine Tool Configuration Sheet from G-Code file and open it in [Libre
 * Go to "Tools" -> "Plugins" -> "Downloaded", click "Add Plugins..." and select the downloaded file org-roiderh-machinetoolconfsheet.nbm
 * Check the Checkbox and click "Install"
 
+# Configuration
+
+Go to:
+Tools -> Options -> Miscellaneous -> Word Processing Program
+Insert the executeable file for word or libreoffice in the textfield for example: "/usr/bin/libreoffice"
+
 # Usage
 
 Open a G-Code file and click the toolbar button: ![toolbar button](src/org/roiderh/machinetoolconfsheet/hi-sheet24.png "toolbar button").
