@@ -131,7 +131,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             if (line.trim().startsWith("%")) { //NOI18N
                 is_header = true;
                 programs.add(line.replaceAll(" ", "")); //NOI18N
-                header.add(line.replaceAll(" ", "")); //NOI18N
+                //header.add(line.replaceAll(" ", "")); //NOI18N
             } else if (line.trim().startsWith("(") || line.trim().startsWith(";")) { //NOI18N
                 if (is_header) {
                     if (line.trim().startsWith("(")) { //NOI18N
@@ -139,7 +139,11 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     } else {
                         line = line.trim().substring(1, line.length());
                     }
-                    header.add(line.trim());
+                    if (line.startsWith("$PATH=/_N_") || line.length() < 1) { //NOI18N
+
+                    } else {
+                        header.add(line.trim());
+                    }
 
                 }
             } else {
@@ -174,7 +178,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                 table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
                 table.getRow(1).getCell(1).setText(ft.format(dNow));
-                
+
                 ArrayList<ArrayList<String>> table_text = new ArrayList<>();
                 for (int i = 0; i < header.size(); i++) {
 
@@ -192,35 +196,37 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     }
                     line.add(name);
                     line.add(desc);
-                            
+
                     table_text.add(line);
-                    
 
                 }
                 XWPFTableRow tableRowHeader;
-                tableRowHeader = table.createRow();
-                
+                //tableRowHeader = table.createRow();
+                tableRowHeader = null;
                 XWPFRun run_table;
-                String prev_name = ""; //NOI18N
+                String prev_name = "dummy_1234567890sadfsaf"; //NOI18N
                 for (int i = 0; i < table_text.size(); i++) {
                     String name = table_text.get(i).get(0);
                     String desc = table_text.get(i).get(1);
-                    if(name.length() > 0 ){
+                                       
+                    if (name.length() > 0) {
                         tableRowHeader = table.createRow();
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
-                        tableRowHeader.getCell(0).setText(name);                        
+                        tableRowHeader.getCell(0).setText(name);
                         run_table.setText(desc);
-                    }
-                    else if(prev_name.length() > 0 && name.length() == 0){
+                    } else if (prev_name.length() > 0 && name.length() == 0) {
                         tableRowHeader = table.createRow();
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
                         tableRowHeader.getCell(0).setText("");   //NOI18N                    
                         run_table.setText(desc);
-                    }else if(prev_name.length() == 0 && name.length() == 0){
+                    } else if (prev_name.length() == 0 && name.length() == 0) {
+                        if(tableRowHeader == null){
+                            tableRowHeader = table.createRow();
+                        }
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
                         run_table.addBreak();
                         run_table.setText(desc);
-                        
+
                     }
                     prev_name = name;
                 }
@@ -239,12 +245,12 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                         tableRowTwo = table.createRow();
                     }
                     tableRowTwo.getCell(0).setText("T" + String.valueOf(toolnr)); //NOI18N
-                    
+
                     // The lines are in the reverse order, therfore reordering:
                     for (int j = t.text.size() - 1; j >= 0; j--) {
                         XWPFRun run_tool = tableRowTwo.getCell(1).getParagraphs().get(0).createRun();
                         run_tool.setText(t.text.get(j));
-                        if(j > 0){
+                        if (j > 0) {
                             run_tool.addBreak();
                         }
                     }
