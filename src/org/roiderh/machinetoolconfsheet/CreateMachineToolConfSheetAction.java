@@ -132,7 +132,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 is_header = true;
                 //programs.add(line.replaceAll(" ", "")); //NOI18N
                 programs.add(this.parse_progname(line));
-                        
+
                 //header.add(line.replaceAll(" ", "")); //NOI18N
             } else if (line.trim().startsWith("(") || line.trim().startsWith(";")) { //NOI18N
                 if (is_header) {
