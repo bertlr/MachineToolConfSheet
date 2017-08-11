@@ -130,7 +130,9 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
             if (line.trim().startsWith("%")) { //NOI18N
                 is_header = true;
-                programs.add(line.replaceAll(" ", "")); //NOI18N
+                //programs.add(line.replaceAll(" ", "")); //NOI18N
+                programs.add(this.parse_progname(line));
+                        
                 //header.add(line.replaceAll(" ", "")); //NOI18N
             } else if (line.trim().startsWith("(") || line.trim().startsWith(";")) { //NOI18N
                 if (is_header) {
@@ -208,7 +210,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 for (int i = 0; i < table_text.size(); i++) {
                     String name = table_text.get(i).get(0);
                     String desc = table_text.get(i).get(1);
-                                       
+
                     if (name.length() > 0) {
                         tableRowHeader = table.createRow();
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
@@ -220,7 +222,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                         tableRowHeader.getCell(0).setText("");   //NOI18N                    
                         run_table.setText(desc);
                     } else if (prev_name.length() == 0 && name.length() == 0) {
-                        if(tableRowHeader == null){
+                        if (tableRowHeader == null) {
                             tableRowHeader = table.createRow();
                         }
                         run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
@@ -280,5 +282,33 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getLocalizedMessage()); //NOI18N
         }
 
+    }
+
+    String parse_progname(String line) {
+
+        String progname = line.trim();
+        if (progname.startsWith("%") == false) { //NOI18N
+            return "";
+        }
+        progname = progname.replaceAll(" ", "");
+        progname = progname.substring(1);
+        if (progname.startsWith("MPF")) {
+            progname = progname.substring(3);
+            progname = progname.concat(".mpf");
+        } else if (progname.startsWith("SPF")) {
+            progname = progname.substring(3);
+            progname = progname.concat(".spf");
+        } else if (progname.startsWith("_N_")) {
+            progname = progname.substring(3);
+            if (progname.endsWith("_MPF_")) {
+                progname = progname.substring(0, progname.length() - 5);
+                progname = progname.concat(".mpf");
+            } else if (progname.endsWith("_SPF_")) {
+                progname = progname.substring(0, progname.length() - 5);
+                progname = progname.concat(".spf");
+            }
+
+        }
+        return progname;
     }
 }
