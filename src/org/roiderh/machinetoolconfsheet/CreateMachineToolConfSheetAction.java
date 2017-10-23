@@ -43,10 +43,13 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.netbeans.editor.BaseDocument;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbPreferences;
+import org.netbeans.modules.editor.NbEditorUtilities;
+import org.openide.filesystems.FileObject;
 
 @ActionID(
         category = "Tools",
@@ -61,11 +64,15 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        BaseDocument doc = null;
         JTextComponent ed = org.netbeans.api.editor.EditorRegistry.lastFocusedComponent();
         if (ed == null) {
             JOptionPane.showMessageDialog(null, "Error: no open editor"); //NOI18N
             return;
         }
+
+        FileObject fo = NbEditorUtilities.getFileObject(ed.getDocument());
+        String path = fo.getPath();
 
         InputStream is = new ByteArrayInputStream(ed.getText().getBytes());
 
@@ -178,8 +185,11 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                 table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr"));
                 table.getRow(0).getCell(1).setText(prog);
 
-                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
-                table.getRow(1).getCell(1).setText(ft.format(dNow));
+                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Filename"));
+                table.getRow(1).getCell(1).setText(path);
+
+                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
+                table.getRow(2).getCell(1).setText(ft.format(dNow));
 
                 ArrayList<ArrayList<String>> table_text = new ArrayList<>();
                 for (int i = 0; i < header.size(); i++) {
