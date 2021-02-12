@@ -135,23 +135,23 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
 
-            if (line.trim().startsWith("%")) { //NOI18N
+            if (line.startsWith("%")) { //NOI18N
                 is_header = true;
                 //programs.add(line.replaceAll(" ", "")); //NOI18N
                 programs.add(this.parse_progname(line));
 
                 //header.add(line.replaceAll(" ", "")); //NOI18N
-            } else if (line.trim().startsWith("(") || line.trim().startsWith(";")) { //NOI18N
+            } else if (line.startsWith("(") || line.startsWith(";")) { //NOI18N
                 if (is_header) {
-                    if (line.trim().startsWith("(")) { //NOI18N
-                        line = line.trim().substring(1, line.length() - 1);
+                    if (line.startsWith("(")) { //NOI18N
+                        line = line.substring(1, line.length() - 1);
                     } else {
-                        line = line.trim().substring(1, line.length());
+                        line = line.substring(1, line.length());
                     }
                     if (line.startsWith("$PATH=/_N_") || line.length() < 1) { //NOI18N
 
                     } else {
-                        header.add(line.trim());
+                        header.add(line);
                     }
 
                 }
@@ -201,10 +201,10 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     int splitpos = header.get(i).indexOf(":");//NOI18N
                     if (splitpos > 1 && splitpos < 25) {
                         name = header.get(i).substring(0, splitpos).trim();
-                        desc = header.get(i).substring(splitpos + 1).trim();
+                        desc = header.get(i).substring(splitpos + 1);
                     } else {
                         name = "";//NOI18N
-                        desc = header.get(i).trim();
+                        desc = header.get(i);
                     }
                     line.add(name);
                     line.add(desc);
