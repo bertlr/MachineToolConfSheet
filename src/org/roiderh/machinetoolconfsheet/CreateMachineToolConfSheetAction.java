@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +39,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+//import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+//import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -50,6 +55,7 @@ import org.openide.awt.ActionRegistration;
 import org.openide.util.NbPreferences;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.filesystems.FileObject;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder;
 
 @ActionID(
         category = "Tools",
@@ -168,28 +174,20 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
             System.out.println("Current Date: " + ft.format(dNow)); //NOI18N
             InputStream in = CreateMachineToolConfSheetAction.class.getResourceAsStream("/org/roiderh/machinetoolconfsheet/resources/base_document.docx"); //NOI18N
 
-            XWPFDocument document = new XWPFDocument(in);
+            //XWPFDocument document = new XWPFDocument(in);
+            //XWPFDocument document = new XWPFDocument();
+            XWPFDocument document = new XWPFDocument(OPCPackage.open(in));
             //Write the Document in file system
             File tempFile = File.createTempFile("NcToolSettings_", ".docx"); //NOI18N
             try (FileOutputStream out = new FileOutputStream(tempFile)) {
-                XWPFTable table = document.getTableArray(0);
+                //XWPFTable table = document.getTableArray(0);
 
-                XWPFParagraph title = document.getParagraphArray(0);
+                XWPFParagraph title = document.getParagraphs().get(0);
                 XWPFRun run = title.createRun();
-                run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "MachineToolConfSheet"));
-                title = document.getParagraphArray(1);
+                run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "MachineToolConfSheet")); //NOI18N
+                title = document.getParagraphs().get(1);
                 run = title.createRun();
-                run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Tools"));
-
-                String prog = String.join(", ", programs); //NOI18N
-                table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr"));
-                table.getRow(0).getCell(1).setText(prog);
-
-                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Filename"));
-                table.getRow(1).getCell(1).setText(path);
-
-                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date"));
-                table.getRow(2).getCell(1).setText(ft.format(dNow));
+                run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Tools")); //NOI18N
 
                 ArrayList<ArrayList<String>> table_text = new ArrayList<>();
                 for (int i = 0; i < header.size(); i++) {
@@ -212,7 +210,30 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     table_text.add(line);
 
                 }
+                //
+
+                //XWPFTable table = document.createTable(table_text.size()+3, 2);
+                //
+                XWPFTable table = document.getTableArray(0);
+                table.setInsideHBorder(XWPFTable.XWPFBorderType.SINGLE, 3, 3, "000000");
+                //XWPFParagraph title = document.createParagraph();
+                //XWPFRun run = title.createRun();
+                //run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "MachineToolConfSheet")); //NOI18N
+                //title = document.createParagraph();
+                //run = title.createRun();
+                //run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Tools")); //NOI18N
+
                 XWPFTableRow tableRowHeader;
+                String prog = String.join(", ", programs); //NOI18N
+                table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr")); //NOI18N
+                table.getRow(0).getCell(1).setText(prog);
+
+                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Filename")); //NOI18N
+                table.getRow(1).getCell(1).setText(path);
+
+                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date")); //NOI18N
+                table.getRow(2).getCell(1).setText(ft.format(dNow));
+
                 //tableRowHeader = table.createRow();
                 tableRowHeader = null;
                 XWPFRun run_table;
@@ -223,49 +244,110 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
                     if (name.length() > 0) {
                         tableRowHeader = table.createRow();
-                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
+                        tableRowHeader.getCell(0).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+
+                        run_table = tableRowHeader.getCell(1).addParagraph().createRun();
                         tableRowHeader.getCell(0).setText(name);
+                        //tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.DASHED);
                         run_table.setText(desc);
                     } else if (prev_name.length() > 0 && name.length() == 0) {
                         tableRowHeader = table.createRow();
-                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
-                        tableRowHeader.getCell(0).setText("");   //NOI18N                    
+                        tableRowHeader.getCell(0).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+
+                        run_table = tableRowHeader.getCell(1).addParagraph().createRun();
+                        tableRowHeader.getCell(0).setText("");   //NOI18N  
+
+                        //tableRowHeader.getCell(1).setText(desc); 
                         run_table.setText(desc);
                     } else if (prev_name.length() == 0 && name.length() == 0) {
                         if (tableRowHeader == null) {
                             tableRowHeader = table.createRow();
-                        }
-                        run_table = tableRowHeader.getCell(1).getParagraphs().get(0).createRun();
-                        run_table.addBreak();
-                        run_table.setText(desc);
+                            tableRowHeader.getCell(0).getCTTc().addNewTcPr();
+                            tableRowHeader.getCell(0).getCTTc().getTcPr().addNewTcBorders();
+                            tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                            tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                            tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+                            tableRowHeader.getCell(1).getCTTc().addNewTcPr();
+                            tableRowHeader.getCell(1).getCTTc().getTcPr().addNewTcBorders();
+                            tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                            tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                            tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
 
+                        }
+                        run_table = tableRowHeader.getCell(1).addParagraph().createRun();
+                        //run_table.addBreak();
+                        run_table.setText(desc);
+                        //tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.DASHED);
                     }
                     prev_name = name;
                 }
 
-                table = document.getTableArray(1);
-                boolean first_line = true;
+                ///////////////////////////////////////////////////
+                //table = document.getTableArray(1);
+                //boolean first_line = true;
                 Set keys = tools.keySet();
+                //table = document.createTable(keys.size(), 2);
+                table = document.getTables().get(1);
+                //table.getCTTbl().addNewTblGrid().addNewGridCol().setW(BigInteger.valueOf(700));
+                //table.getCTTbl().getTblGrid().addNewGridCol().setW(BigInteger.valueOf(9000));
+                XWPFTableRow newRow;
+                for (int i = 0; i < keys.size(); i++) {
+                    if (i > 0) {
+                        tableRowHeader = table.createRow();
+                        tableRowHeader.getCell(0).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(0).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().addNewTcPr();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().addNewTcBorders();
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewBottom().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewRight().setVal(STBorder.SINGLE);
+                        tableRowHeader.getCell(1).getCTTc().getTcPr().getTcBorders().addNewLeft().setVal(STBorder.SINGLE);
+
+                    }
+                }
+                int current_row = 0;
                 for (Iterator i = keys.iterator(); i.hasNext();) {
                     int toolnr = (Integer) i.next();
                     Tool t = tools.get(toolnr);
                     XWPFTableRow tableRowTwo;
-                    if (first_line) {
-                        tableRowTwo = table.getRow(0);
-                        first_line = false;
-                    } else {
-                        tableRowTwo = table.createRow();
-                    }
+
+                    //current_row = table.getRows().size()-1;
+                    tableRowTwo = table.getRow(current_row);
                     tableRowTwo.getCell(0).setText("T" + String.valueOf(toolnr)); //NOI18N
 
+                    if (t.text.isEmpty()) {
+                        tableRowTwo.getCell(1).addParagraph();
+                    }
                     // The lines are in the reverse order, therfore reordering:
                     for (int j = t.text.size() - 1; j >= 0; j--) {
-                        XWPFRun run_tool = tableRowTwo.getCell(1).getParagraphs().get(0).createRun();
+                        XWPFRun run_tool = tableRowTwo.getCell(1).addParagraph().createRun();
                         run_tool.setText(t.text.get(j));
                         if (j > 0) {
-                            run_tool.addBreak();
+                            //run_tool.addBreak();
+                            //run_tool.addCarriageReturn();
                         }
                     }
+                    current_row++;
                 }
 
                 document.write(out);
@@ -290,6 +372,8 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
         } catch (IOException | MissingResourceException ex) {
             JOptionPane.showMessageDialog(null, "Error: " + ex.getLocalizedMessage()); //NOI18N
+        } catch (InvalidFormatException ife) {
+            JOptionPane.showMessageDialog(null, "Error: " + ife.getLocalizedMessage()); //NOI18N
         }
 
     }
