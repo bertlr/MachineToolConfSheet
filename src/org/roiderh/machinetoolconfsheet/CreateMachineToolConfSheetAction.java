@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
+//import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
@@ -40,8 +41,6 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-//import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-//import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -100,6 +99,7 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
         TreeMap<Integer, Tool> tools = new TreeMap<>();
         ArrayList<String> programs = new ArrayList<>();
+        Set<String> wks_dirs = new HashSet<String>();
         int activ_tool = -1;
         // Read all Tools with comments:
         for (int i = lines.size() - 1; i >= 0; i--) {
@@ -140,7 +140,9 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         // Read the Comments at the beginning of the file:
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
-
+            if (line.startsWith(";$PATH=/_N_")) { //NOI18N
+                wks_dirs.add(this.extractPath(line));
+            }
             if (line.startsWith("%")) { //NOI18N
                 is_header = true;
                 //programs.add(line.replaceAll(" ", "")); //NOI18N
@@ -170,12 +172,10 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
         try {
             Date dNow = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy"); //NOI18N
-
+            Date dModified = fo.lastModified();
             System.out.println("Current Date: " + ft.format(dNow)); //NOI18N
             InputStream in = CreateMachineToolConfSheetAction.class.getResourceAsStream("/org/roiderh/machinetoolconfsheet/resources/base_document.docx"); //NOI18N
 
-            //XWPFDocument document = new XWPFDocument(in);
-            //XWPFDocument document = new XWPFDocument();
             XWPFDocument document = new XWPFDocument(OPCPackage.open(in));
             //Write the Document in file system
             File tempFile = File.createTempFile("NcToolSettings_", ".docx"); //NOI18N
@@ -210,29 +210,36 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
                     table_text.add(line);
 
                 }
-                //
 
                 //XWPFTable table = document.createTable(table_text.size()+3, 2);
                 //
                 XWPFTable table = document.getTableArray(0);
-                table.setInsideHBorder(XWPFTable.XWPFBorderType.SINGLE, 3, 3, "000000");
-                //XWPFParagraph title = document.createParagraph();
-                //XWPFRun run = title.createRun();
-                //run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "MachineToolConfSheet")); //NOI18N
-                //title = document.createParagraph();
-                //run = title.createRun();
-                //run.setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Tools")); //NOI18N
 
+                String wks_dir = "";
+                for (Iterator i = wks_dirs.iterator(); i.hasNext();) {
+                    if (wks_dir.length() > 0) {
+                        wks_dir = wks_dir + ", "; //NOI18N
+                    }
+                    wks_dir = wks_dir + (String) i.next();
+
+                }
+                //wks_dir = String.join(", ", wks_dirs.toArray());
                 XWPFTableRow tableRowHeader;
                 String prog = String.join(", ", programs); //NOI18N
                 table.getRow(0).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "ProgNr")); //NOI18N
-                table.getRow(0).getCell(1).setText(prog);
+                table.getRow(0).getCell(1).setText(prog);//NOI18N
 
-                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Filename")); //NOI18N
-                table.getRow(1).getCell(1).setText(path);
+                table.getRow(1).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Workpiece")); //NOI18N
+                table.getRow(1).getCell(1).setText(wks_dir);//NOI18N
 
-                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date")); //NOI18N
-                table.getRow(2).getCell(1).setText(ft.format(dNow));
+                table.getRow(2).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Filename")); //NOI18N
+                table.getRow(2).getCell(1).setText(path);
+
+                table.getRow(3).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Date")); //NOI18N
+                table.getRow(3).getCell(1).setText(ft.format(dNow));
+
+                table.getRow(4).getCell(0).setText(org.openide.util.NbBundle.getMessage(CreateMachineToolConfSheetAction.class, "Modified")); //NOI18N
+                table.getRow(4).getCell(1).setText(ft.format(dModified));
 
                 //tableRowHeader = table.createRow();
                 tableRowHeader = null;
@@ -382,27 +389,39 @@ public final class CreateMachineToolConfSheetAction implements ActionListener {
 
         String progname = line.trim();
         if (progname.startsWith("%") == false) { //NOI18N
-            return "";
+            return ""; //NOI18N
         }
-        progname = progname.replaceAll(" ", "");
+        progname = progname.replaceAll(" ", ""); //NOI18N
         progname = progname.substring(1);
-        if (progname.startsWith("MPF")) {
+        if (progname.startsWith("MPF")) { //NOI18N
             progname = progname.substring(3);
-            progname = progname.concat(".mpf");
-        } else if (progname.startsWith("SPF")) {
+            progname = progname.concat(".mpf"); //NOI18N
+        } else if (progname.startsWith("SPF")) { //NOI18N
             progname = progname.substring(3);
-            progname = progname.concat(".spf");
-        } else if (progname.startsWith("_N_")) {
+            progname = progname.concat(".spf"); //NOI18N
+        } else if (progname.startsWith("_N_")) { //NOI18N
             progname = progname.substring(3);
-            if (progname.endsWith("_MPF_")) {
+            if (progname.endsWith("_MPF_")) { //NOI18N
                 progname = progname.substring(0, progname.length() - 5);
-                progname = progname.concat(".mpf");
-            } else if (progname.endsWith("_SPF_")) {
+                progname = progname.concat(".mpf"); //NOI18N
+            } else if (progname.endsWith("_SPF_")) { //NOI18N
                 progname = progname.substring(0, progname.length() - 5);
-                progname = progname.concat(".spf");
+                progname = progname.concat(".spf"); //NOI18N
             }
 
         }
         return progname;
+    }
+
+    private String extractPath(String line) {
+        if (line.trim().startsWith(";$PATH=") == false) { //NOI18N
+            return "";//NOI18N
+        }
+        String path = line.trim().substring(11);
+        path = path.replace("_DIR/_N_", ".DIR/");//NOI18N
+        path = path.substring(0, path.length() - 4) + ".WPD";//NOI18N
+
+        return path;
+
     }
 }
